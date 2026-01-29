@@ -19,12 +19,10 @@ IMAGE_NAME="uptocode-website"
 TAG="latest"
 FULL_IMAGE="${REGISTRY}/${IMAGE_NAME}:${TAG}"
 
-# Check if .env exists
+# Check if .env exists, create dummy if not (env vars will be set in Portainer)
 if [ ! -f .env ]; then
-    echo -e "${RED}❌ Error: .env file not found${NC}"
-    echo "Please create .env file with your SMTP credentials"
-    echo "You can copy from .env.example: cp .env.example .env"
-    exit 1
+    echo -e "${YELLOW}⚠️  No .env file found, creating dummy file for build...${NC}"
+    echo "# Env variables will be set in Portainer" > .env
 fi
 
 # Install dependencies

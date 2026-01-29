@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import morgan from 'morgan';
 
 dotenv.config();
 
@@ -14,12 +15,47 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy for real IP detection (Cloudflare/reverse proxy)
+app.set('trust proxy', true);
+
+// Create access log directory if it doesn't exist
+const logDir = path.join(__dirname);
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
+
+// Create write stream for access log
+const accessLogStream = fs.createWriteStream(path.join(logDir, 'access.log'), { flags: 'a' });
+
+// Custom morgan token to get real IP
+morgan.token('real-ip', (req) => {
+  return req.ip || req.connection.remoteAddress;
+});
+
+// Custom format that includes real IP
+const logFormat = ':real-ip - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"';
+
+// Setup morgan logging - stream to both file and stdout, but skip health checks for stdout
+app.use(morgan(logFormat, {
+  stream: accessLogStream
+}));
+
+app.use(morgan(logFormat, {
+  skip: (req) => req.url === '/api/health'
+}));
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from React build (copied into server/dist in the image)
-app.use(express.static(path.join(__dirname, 'dist')));
+// Serve static files from React build
+// In production (Nixpacks/Coolify), files are in ./dist
+// In Docker, files are copied to ./server/dist
+const distPath = fs.existsSync(path.join(__dirname, 'dist')) 
+  ? path.join(__dirname, 'dist')
+  : path.join(__dirname, '../dist');
+
+app.use(express.static(distPath));
 
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
@@ -171,16 +207,21 @@ app.get('/api/health', (req, res) => {
 
 // Serve React app for all other routes (SPA)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist/index.html'));
+  const indexPath = fs.existsSync(path.join(__dirname, 'dist/index.html'))
+    ? path.join(__dirname, 'dist/index.html')
+    : path.join(__dirname, '../dist/index.html');
+  res.sendFile(indexPath);
 });
 
 // Runtime check: confirm the built frontend exists and log contents for debugging
-const distPath = path.join(__dirname, 'dist');
-const indexHtmlPath = path.join(distPath, 'index.html');
+const runtimeDistPath = fs.existsSync(path.join(__dirname, 'dist'))
+  ? path.join(__dirname, 'dist')
+  : path.join(__dirname, '../dist');
+const indexHtmlPath = path.join(runtimeDistPath, 'index.html');
 if (fs.existsSync(indexHtmlPath)) {
   try {
-    const entries = fs.readdirSync(distPath);
-    console.log(`✓ Serving static files from: ${distPath}`);
+    const entries = fs.readdirSync(runtimeDistPath);
+    console.log(`✓ Serving static files from: ${runtimeDistPath}`);
     console.log(`✓ dist contains ${entries.length} entries: ${entries.slice(0, 20).join(', ')}`);
   } catch (err) {
     console.log('⚠️ Could not read dist directory contents:', err);

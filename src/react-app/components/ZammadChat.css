@@ -1,0 +1,33 @@
+.open-zammad-chat {
+  padding: 0.5rem 1.25rem;
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.open-zammad-chat:hover {
+  background-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.open-zammad-chat:active {
+  transform: translateY(0);
+}
+
+.open-zammad-chat.is-inactive {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .open-zammad-chat {
+    padding: 0.4rem 1rem;
+    font-size: 13px;
+  }
+}
