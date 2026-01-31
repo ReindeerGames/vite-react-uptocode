@@ -97,11 +97,11 @@ export default function Contact() {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="phone">WhatsApp Number (with country code, e.g., 27821234567)</label>
+                  <label htmlFor="phone">WhatsApp Number (e.g., 0821234567 or 27821234567)</label>
                   <input
                     type="tel"
                     id="phone"
-                    placeholder="27821234567"
+                    placeholder="0821234567"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />

@@ -77,9 +77,27 @@ transporter.verify((error, success) => {
   }
 });
 
+// Helper function to normalize phone number for WhatsApp API
+function normalizePhoneNumber(phone) {
+  // Remove all non-digit characters
+  let cleaned = phone.replace(/\D/g, '');
+  
+  // If it starts with 0, replace with 27 (South African country code)
+  if (cleaned.startsWith('0')) {
+    cleaned = '27' + cleaned.substring(1);
+  }
+  
+  return cleaned;
+}
+
 // Helper function to send WhatsApp message
 async function sendWhatsAppMessage(phoneNumber, message) {
   try {
+    // Normalize the phone number
+    const normalizedPhone = normalizePhoneNumber(phoneNumber);
+    
+    console.log(`Sending WhatsApp to normalized number: ${normalizedPhone}`);
+    
     const response = await fetch('https://msg.shtf.co.za/api/messages/text', {
       method: 'POST',
       headers: {
@@ -88,7 +106,7 @@ async function sendWhatsAppMessage(phoneNumber, message) {
       },
       body: JSON.stringify({
         instanceId: process.env.WHATSAPP_INSTANCE_ID,
-        phoneNumber: phoneNumber,
+        phoneNumber: normalizedPhone,
         message: message,
       }),
     });
@@ -98,7 +116,9 @@ async function sendWhatsAppMessage(phoneNumber, message) {
       throw new Error(`WhatsApp API error: ${response.status} - ${errorText}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    console.log('WhatsApp API response:', result);
+    return result;
   } catch (error) {
     console.error('WhatsApp send error:', error);
     throw error;
