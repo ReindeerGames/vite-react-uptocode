@@ -77,10 +77,38 @@ transporter.verify((error, success) => {
   }
 });
 
+// Helper function to send WhatsApp message
+async function sendWhatsAppMessage(phoneNumber, message) {
+  try {
+    const response = await fetch('https://msg.shtf.co.za/api/messages/text', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        instanceId: process.env.WHATSAPP_INSTANCE_ID,
+        phoneNumber: phoneNumber,
+        message: message,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`WhatsApp API error: ${response.status} - ${errorText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('WhatsApp send error:', error);
+    throw error;
+  }
+}
+
 // Contact form endpoint
 app.post('/api/contact', async (req, res) => {
   try {
-    const { name, email, company, message } = req.body;
+    const { name, email, phone, company, message } = req.body;
 
     // Validate input
     if (!name || !email || !message) {
@@ -99,6 +127,7 @@ New Contact Form Submission from UptoCode.co.za
 
 Name: ${name}
 Email: ${email}
+Phone: ${phone || 'Not provided'}
 Company: ${company || 'Not provided'}
 
 Message:
@@ -112,6 +141,7 @@ Sent from UptoCode Contact Form
       <h2>New Contact Form Submission</h2>
       <p><strong>Name:</strong> ${name}</p>
       <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
       <p><strong>Company:</strong> ${company || 'Not provided'}</p>
       <h3>Message:</h3>
       <p>${message.replace(/\n/g, '<br>')}</p>
@@ -193,6 +223,20 @@ Sent from UptoCode Contact Form
     });
 
     console.log(`✓ Emails sent successfully - Admin: ${process.env.SMTP_TO}, User: ${email}`);
+
+    // Send WhatsApp message if phone number is provided
+    if (phone && phone.trim()) {
+      try {
+        const whatsappMessage = `Hi ${name.split(' ')[0]}! 👋\n\nThank you for reaching out to UptoCode. We've received your message and our team will get back to you within 24 hours.\n\nIn the meantime, feel free to check out our recent projects at https://uptocode.co.za/projects\n\nLooking forward to discussing how we can help transform your business!\n\n- The UptoCode Team`;
+        
+        await sendWhatsAppMessage(phone, whatsappMessage);
+        console.log(`✓ WhatsApp message sent to ${phone}`);
+      } catch (whatsappError) {
+        // Log the error but don't fail the request
+        console.error('WhatsApp send failed (non-critical):', whatsappError.message);
+      }
+    }
+
     res.json({ success: true, message: 'Message sent successfully' });
   } catch (error) {
     console.error('Contact form error:', error);

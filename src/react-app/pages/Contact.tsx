@@ -5,6 +5,7 @@ export default function Contact() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     company: '',
     message: ''
   });
@@ -30,7 +31,7 @@ export default function Contact() {
       }
 
       setStatus('success');
-      setFormData({ name: '', email: '', company: '', message: '' });
+      setFormData({ name: '', email: '', phone: '', company: '', message: '' });
     } catch (error) {
       setStatus('error');
       setErrorMessage('Failed to send message. Please try again or email us directly.');
@@ -92,6 +93,17 @@ export default function Contact() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="phone">WhatsApp Number (with country code, e.g., 27821234567)</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    placeholder="27821234567"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
                 </div>
 
