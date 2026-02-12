@@ -98,16 +98,15 @@ async function sendWhatsAppMessage(phoneNumber, message) {
     
     console.log(`Sending WhatsApp to normalized number: ${normalizedPhone}`);
     
-    const response = await fetch('https://msg.shtf.co.za/api/messages/text', {
+    const response = await fetch(`https://ultra.shtf.co.za/${process.env.WHATSAPP_INSTANCE_ID}/messages/chat`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.WHATSAPP_API_TOKEN}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        instanceId: process.env.WHATSAPP_INSTANCE_ID,
-        phoneNumber: normalizedPhone,
-        message: message,
+        token: process.env.WHATSAPP_API_TOKEN,
+        to: normalizedPhone,
+        body: message,
       }),
     });
 
