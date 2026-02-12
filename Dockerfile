@@ -3,6 +3,19 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install Chromium for Puppeteer
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Tell Puppeteer to use installed Chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
 # Copy package files
 COPY package*.json ./
 
@@ -12,7 +25,11 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the React app
+# Generate screenshots
+RUN mkdir -p public/screenshots && \
+    node scripts/generate-screenshots.js || echo "Screenshot generation failed, continuing build..."
+
+# Build the React app (this will include the screenshots in public/)
 RUN npm run build:app
 
 # Production stage

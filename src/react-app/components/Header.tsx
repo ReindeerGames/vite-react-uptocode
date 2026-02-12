@@ -1,5 +1,4 @@
 import { Link, useLocation } from 'react-router-dom';
-import ZammadChat from './ZammadChat';
 import './Header.css';
 
 export default function Header() {
@@ -27,7 +26,6 @@ export default function Header() {
           <Link to="/contact" className={isActive('/contact') ? 'nav-link active' : 'nav-link'}>
             Contact
           </Link>
-          <ZammadChat />
         </nav>
       </div>
     </header>

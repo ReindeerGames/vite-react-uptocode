@@ -3,11 +3,13 @@
   "description": "UptoCode - Custom Software Solutions & Business Automation",
   "private": true,
   "dependencies": {
+    "concurrently": "^9.1.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
     "morgan": "^1.10.0",
     "nodemailer": "^7.0.11",
+    "puppeteer": "^23.11.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-router-dom": "^7.10.1"
@@ -32,9 +34,11 @@
   },
   "scripts": {
     "build:app": "vite build",
-    "build": "npm run build:app",
-    "dev": "vite",
+    "build": "npm run build:app && npm run screenshots",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:vite\"",
+    "dev:vite": "vite",
     "dev:server": "node server/index.js",
+    "screenshots": "node scripts/generate-screenshots.js",
     "start": "node server/index.js",
     "lint": "eslint .",
     "docker:build": "docker build -t uptocode-website .",

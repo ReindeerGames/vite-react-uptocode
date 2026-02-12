@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import morgan from 'morgan';
+import puppeteer from 'puppeteer';
 
 dotenv.config();
 
@@ -266,6 +267,81 @@ Sent from UptoCode Contact Form
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Screenshot endpoint
+app.get('/api/screenshot', async (req, res) => {
+  const { url } = req.query;
+
+  if (!url) {
+    return res.status(400).json({ error: 'URL parameter is required' });
+  }
+
+  // Validate URL
+  try {
+    new URL(url);
+  } catch (error) {
+    return res.status(400).json({ error: 'Invalid URL provided' });
+  }
+
+  let browser;
+  try {
+    console.log(`Capturing screenshot for: ${url}`);
+    
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu'
+      ]
+    });
+
+    const page = await browser.newPage();
+    
+    // Set viewport to 16:9 ratio (1600x900)
+    await page.setViewport({
+      width: 1600,
+      height: 900,
+      deviceScaleFactor: 1
+    });
+
+    // Navigate to the URL with timeout
+    await page.goto(url, {
+      waitUntil: 'networkidle2',
+      timeout: 30000
+    });
+
+    // Take screenshot
+    const screenshot = await page.screenshot({
+      type: 'jpeg',
+      quality: 85
+    });
+
+    await browser.close();
+
+    // Set cache headers (cache for 1 day)
+    res.set({
+      'Content-Type': 'image/jpeg',
+      'Cache-Control': 'public, max-age=86400',
+      'Content-Length': screenshot.length
+    });
+
+    res.send(screenshot);
+    console.log(`✓ Screenshot captured successfully for ${url}`);
+  } catch (error) {
+    console.error('Screenshot error:', error);
+    
+    if (browser) {
+      await browser.close();
+    }
+
+    res.status(500).json({ 
+      error: 'Failed to capture screenshot',
+      message: error.message 
+    });
+  }
 });
 
 // Serve React app for all other routes (SPA)

@@ -1,46 +1,121 @@
 .projects-section {
-  background: white;
-  padding: 3rem 2rem;
+  background: linear-gradient(180deg, white 0%, var(--bg-alt) 100%);
+  padding: 4rem 2rem;
 }
 
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 2.5rem;
 }
 
 .project-card {
   background: white;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 2rem;
-  transition: all 0.3s ease;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   text-decoration: none;
   color: inherit;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.project-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-secondary) 100%);
+  transition: width 0.3s ease;
 }
 
 .project-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  border-color: var(--accent);
+  box-shadow: var(--shadow-accent);
+  border-color: var(--border-accent);
+}
+
+.project-card:hover::after {
+  width: 100%;
+}
+
+.project-screenshot {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-dark-alt) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.project-screenshot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.project-card:hover .project-screenshot img {
+  transform: scale(1.05);
+}
+
+.project-screenshot-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(10, 22, 40, 0.8) 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1.5rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.project-card:hover .project-screenshot-overlay {
+  opacity: 1;
+}
+
+.view-site-text {
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.project-content {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .project-category {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--accent);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: rgba(14, 165, 233, 0.1);
+  border-radius: var(--radius-sm);
 }
 
 .project-name {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--primary);
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
 }
 
 .project-description {
@@ -48,35 +123,70 @@
   line-height: 1.6;
   margin-bottom: 1.5rem;
   flex: 1;
+  font-size: 0.95rem;
 }
 
-.project-link {
-  color: var(--accent);
-  font-weight: 600;
-  font-size: 0.9rem;
+.project-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.tech-tag {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--bg-alt);
+  color: var(--text-light);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-weight: 500;
+}
+
+.project-card:hover .tech-tag {
+  border-color: var(--border-accent);
+  background: rgba(14, 165, 233, 0.05);
 }
 
 .projects-cta {
-  background: var(--bg-alt);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   padding: 5rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.projects-cta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 30% 50%, rgba(14, 165, 233, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 70% 50%, rgba(255, 107, 53, 0.1) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .cta-content {
   max-width: 700px;
   margin: 0 auto;
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 .cta-content h2 {
   font-size: 2.5rem;
-  color: var(--primary);
+  font-weight: 700;
+  color: var(--text-on-dark);
   margin-bottom: 1rem;
-  letter-spacing: -0.5px;
+  letter-spacing: -1px;
 }
 
 .cta-content p {
   font-size: 1.125rem;
-  color: var(--text-light);
+  color: var(--text-on-dark-muted);
   margin-bottom: 2rem;
   line-height: 1.6;
 }
@@ -84,6 +194,10 @@
 @media (max-width: 768px) {
   .projects-grid {
     grid-template-columns: 1fr;
+  }
+
+  .project-content {
+    padding: 1.5rem;
   }
 
   .cta-content h2 {
